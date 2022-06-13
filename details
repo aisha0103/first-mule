@@ -30,7 +30,7 @@ def publishProject(props, token, result)
  request.apiVersion = 'v4'
  request.version = '1.0.0'
  request.main = 'api.raml'
- request.assetId = 'hello-world'
+ request.assetId = ' 17889588'
  request.groupId = e0cda975-e4f3-44a1-83ee-d14b91bd3a7e
  def message = JsonOutput.toJson(request)
  log(INFO, "create publish request request message=" + message);
