@@ -1,0 +1,23 @@
+def getAnypointToken(props)
+  {
+    log(DEBUG,  "START getAnypointToken")
+    def username=props.username
+    def password=props.password
+    log(TRACE, "username=" + username)
+    log(TRACE, "password=" + password)
+    def urlString = "https://test-sample-helloworld.us-e2.cloudhub.io"
+    def message = 'username='+username+'&amp;password='+password
+    def headers=["Content-Type":"application/x-www-form-urlencoded", "Accept": "application/json"]
+    def connection = doRESTHTTPCall(urlString, "POST", message, headers)
+    if ( connection.responseCode =~ '2..') 
+    {
+    }else
+    {
+      throw new Exception("Failed to get the login token!")
+    }
+    def response = "${connection.content}"
+    def token = new JsonSlurper().parseText(response).access_token
+    log(INFO, "Bearer Token: ${token}")
+    log(DEBUG,  "END getAnypointToken")
+    return token
+  }
