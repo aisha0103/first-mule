@@ -1,0 +1,21 @@
+def getProjectID(props, token)
+  {
+log(INFO,  "START getProjectID")
+def urlString = "https://anypoint.mulesoft.com/designcenter/designer/#/project/50fb30e0-dfb9-4e67-813e-5fe5222a0588"
+def headers=["x-organization-id":props.orgid, "Authorization": "Bearer " + token]
+def connection = doRESTHTTPCall(urlString, "GET", null, headers)
+   def response = "${connection.content}"
+   if (connection.responseCode = ~'2..') {
+    log(INFO, "the project details retrieved successfully! statusCode=" + connection.responseCode)
+   } else {
+    throw new Exception("Failed to retrieve project details! statusCode=${connection.responseCode} responseMessage=${response}")
+   }
+   def projectDetails = new JsonSlurper().parseText(response)
+   log(DEBUG, projectDetails)
+   Matcher myMatcher = projectDetails.id = ~/\[([a-zA-Z0-9-\s]+)\]/
+   def originalProjectId = myMatcher[0][1]
+   def result = ["projectId": originalProjectId]
+   log(DEBUG, result)
+   log(DEBUG, "END getProjectID")
+   return result;
+  }
