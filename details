@@ -12,10 +12,40 @@ def connection = doRESTHTTPCall(urlString, "GET", null, headers)
    }
    def projectDetails = new JsonSlurper().parseText(response)
    log(DEBUG, projectDetails)
-   Matcher myMatcher = projectDetails.id = ~/\[([a-zA-Z0-9-\s]+)\]/
+   Matcher myMatcher = projectDetails.id = 17889588
    def originalProjectId = myMatcher[0][1]
    def result = ["projectId": originalProjectId]
    log(DEBUG, result)
    log(DEBUG, "END getProjectID")
    return result;
   }
+//project details result from the previous step is used here
+def publishProject(props, token, result)
+  {
+ log(INFO, "START publishProject")
+ def requestTemplate = '{"name":null, "apiVersion":null, "version":null, "tags": [],"main":null, "assetId":null, "groupId":null,"classifier":"raml"}'
+ def request = new JsonSlurper().parseText(requestTemplate);
+ // This request can be parameterized depending on the requirements. For demo purpose they have been hard-coded.
+ request.name = 'hello-world'
+ request.apiVersion = 'v4'
+ request.version = '1.0.0'
+ request.main = 'api.raml'
+ request.assetId = 'hello-world'
+ request.groupId = e0cda975-e4f3-44a1-83ee-d14b91bd3a7e
+ def message = JsonOutput.toJson(request)
+ log(INFO, "create publish request request message=" + message);
+ def urlString = "https://anypoint.mulesoft.com/designcenter/designer/#/project/50fb30e0-dfb9-4e67-813e-5fe5222a0588" + result.projectId + "/branches/master/publish/exchange"
+ log(INFO, "create publish request url" + urlString);
+ def headers = ["content-type": "application/json", "x-organization-id": props.orgid, "Authorization": "Bearer " + token, "x-owner-id": props.userId]
+ def connection = doRESTHTTPCall(urlString, "POST", message, headers)
+ def response = "${connection.content}"
+ if (connection.responseCode = ~'2..') {
+  log(INFO, "the asset published successfully! statusCode=" + connection.responseCode)
+ } else {
+  throw new Exception("Failed to publish asset! statusCode=${connection.responseCode} responseMessage=${response}")
+  
+ }
+ def publishProjectDetails = new JsonSlurper().parseText(response)
+ log(DEBUG, "END publishProject")
+ return publishProjectDetails;
+}
